@@ -11,6 +11,15 @@ This project provides an interactive web application for stock price prediction 
 - **Stock Comparison**: Compare the historical performance and predictions of multiple stocks.
 - **Data Visualization**: Interactive charts and graphs to visualize stock price trends, predictions, and technical indicators.
 
+### Usage
+Once the application is running, follow these steps to use it:
+- **Enter Stock Ticker**: In the sidebar, input the stock ticker symbol (e.g., AAPL for Apple Inc., GOOGL for Alphabet Inc.).
+- **Select Prediction Horizon**: Choose how far in the future you want to predict (e.g., 1 month, 6 months, 1 year).
+- **Choose Historical Data Range**: Select the range of historical data to use for prediction (e.g., 1 year, 5 years).
+- **Add Additional Tickers for Comparison**: You can input multiple stock tickers to compare their performance and predictions. This allows you to analyze different stocks side by side.
+- **Analyze Technical Indicators**: View key stock indicators such as Simple Moving Averages (SMA), Exponential Moving Averages (EMA), Bollinger Bands, and others to help assess the stock's performance and trends.
+- **View Predictions and Trends**: The app will generate predictions for the selected stock(s) using the chosen forecasting models. You can view both the historical trends and future predictions on an interactive chart.
+
 ## Requirements
 
 To run the application, you'll need the following libraries:
