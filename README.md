@@ -1,6 +1,7 @@
 # Stock-Insights-Prediction-Analysis
 A powerful Streamlit-based application for stock price prediction, technical analysis, and comparisons, utilizing Prophet, ARIMA, and ARCH models alongside classic indicators.
 
+
 ## Overview
 This project provides an interactive web application for stock price prediction and analysis. It uses advanced forecasting models such as **Prophet**, **ARIMA**, and **ARCH** along with classic technical indicators. The application allows users to forecast stock prices, view historical data, and compare the performance of different stocks over a customizable time horizon.
 
@@ -19,6 +20,7 @@ Once the application is running, follow these steps to use it:
 - **Add Additional Tickers for Comparison**: You can input multiple stock tickers to compare their performance and predictions. This allows you to analyze different stocks side by side.
 - **Analyze Technical Indicators**: View key stock indicators such as Simple Moving Averages (SMA), Exponential Moving Averages (EMA), Bollinger Bands, and others to help assess the stock's performance and trends.
 - **View Predictions and Trends**: The app will generate predictions for the selected stock(s) using the chosen forecasting models. You can view both the historical trends and future predictions on an interactive chart.
+
 
 ## Requirements
 
