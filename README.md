@@ -2,25 +2,24 @@
 A powerful Streamlit-based application for stock price prediction, technical analysis, and comparisons, utilizing Prophet, ARIMA, and ARCH models alongside classic indicators.
 
 ## Overview
-This application allows users to analyze and predict stock prices using historical data, and provides technical indicators and forecasting tools. It integrates different models like **Prophet**, **ARIMA**, and **ARCH** to help investors make informed decisions. The application also allows comparing the performance of various stocks over a given period.
+This project provides an interactive web application for stock price prediction and analysis. It uses advanced forecasting models such as **Prophet**, **ARIMA**, and **ARCH** along with classic technical indicators. The application allows users to forecast stock prices, view historical data, and compare the performance of different stocks over a customizable time horizon.
 
 ### Key Features:
-- **Stock Price Prediction**: Forecast future stock prices using advanced models.
-- **Technical Analysis**: View stock indicators such as moving averages, Bollinger Bands, and more.
-- **Multiple Models**: Use Prophet, ARIMA, and ARCH models for stock price prediction.
-- **Stock Comparison**: Compare different stock tickers for performance over a defined range.
-- **Visualizations**: Interactive charts to visualize price trends, predictions, and indicators.
+- **Stock Price Prediction**: Forecast future stock prices using advanced time series models.
+- **Technical Indicators**: View key stock indicators like Moving Averages, Bollinger Bands, and more.
+- **Multiple Models**: Use **Prophet**, **ARIMA**, and **ARCH** models for different types of predictions.
+- **Stock Comparison**: Compare the historical performance and predictions of multiple stocks.
+- **Data Visualization**: Interactive charts and graphs to visualize stock price trends, predictions, and technical indicators.
 
-## Installation
+## Requirements
 
-### Prerequisites:
-- Python 3.8+
-- Git (if you want to clone the repository)
+To run the application, you'll need the following libraries:
 
-### Steps:
-1. **Clone the repository**:
-   If you have Git installed, you can clone the repository by running:
-   ```bash
-   git clone https://github.com/username/Stock-Insights-Prediction-Analysis.git
-   cd Stock-Insights-Prediction-Analysis
-
+- **Python 3.8+**
+- **Streamlit**: For creating the interactive web app.
+- **pandas**: For data manipulation and analysis.
+- **yfinance**: For retrieving stock data from Yahoo Finance.
+- **prophet**: For time series forecasting using the Prophet model.
+- **matplotlib**: For data visualization (e.g., plotting stock price trends).
+- **statsmodels**: For statistical modeling (ARIMA).
+- **arch**: For time series modeling with ARCH and GARCH models.
