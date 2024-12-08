@@ -11,7 +11,7 @@ This project provides an interactive web application for stock price prediction 
 - **Stock Comparison**: Compare the historical performance and predictions of multiple stocks.
 - **Data Visualization**: Interactive charts and graphs to visualize stock price trends, predictions, and technical indicators.
 
-### Usage
+### Usage:
 Once the application is running, follow these steps to use it:
 - **Enter Stock Ticker**: In the sidebar, input the stock ticker symbol (e.g., AAPL for Apple Inc., GOOGL for Alphabet Inc.).
 - **Select Prediction Horizon**: Choose how far in the future you want to predict (e.g., 1 month, 6 months, 1 year).
