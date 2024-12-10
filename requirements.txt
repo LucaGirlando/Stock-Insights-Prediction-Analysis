@@ -1,0 +1,7 @@
+#Streamlit
+#pandas
+#yfinance
+#prophet
+#matplotlib
+#statsmodels
+#arch
