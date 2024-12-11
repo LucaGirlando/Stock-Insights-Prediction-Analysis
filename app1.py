@@ -8,6 +8,12 @@ import numpy as np
 from statsmodels.tsa.arima.model import ARIMA
 from arch import arch_model
 
+st.markdown("""
+    <p style="font-size: 12px; text-align: center;">
+        Created by: <a href="https://www.linkedin.com/in/luca-girlando-775463302/" target="_blank">Luca Girlando</a>
+    </p>
+""", unsafe_allow_html=True)
+
 # Title
 st.title("Stock Insights: Prediction & Technical Analysis")
 
