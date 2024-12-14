@@ -108,7 +108,6 @@ else:
     fig1 = m.plot(forecast)
     st.pyplot(fig1)
 
-    st.subheader("How to interpret the forecast plot:")
     st.markdown(
         "- **Blue line**: Predicted stock price.\n"
         "- **Shaded area**: Uncertainty intervals (confidence intervals)."
@@ -119,7 +118,6 @@ else:
     fig2 = m.plot_components(forecast)
     st.pyplot(fig2)
 
-    st.subheader("How to interpret the components:")
     st.markdown(
         "- **Trend**: Shows the overall direction of the stock price over time.\n"
         "- **Yearly seasonality**: Highlights recurring annual patterns in the stock price.\n"
@@ -263,7 +261,6 @@ fig.update_layout(
 # Display in Streamlit
 st.plotly_chart(fig)
 
-st.subheader("How to interpret the technical indicators:")
 st.markdown(
         "- **SMA (Simple Moving Average)**: A simple average of the stock price over a specified period, often used to identify trends.\n"
         "- **EMA (Exponential Moving Average)**: A weighted moving average that gives more importance to recent prices.\n"
@@ -365,6 +362,36 @@ fig.update_layout(
 
 # Display in Streamlit
 st.plotly_chart(fig)
+
+# Add interpretation guide for Ichimoku Cloud
+st.markdown(
+    """
+    - **Tenkan-sen (Conversion Line):** A short-term trend indicator. It shows the average of the highest high and lowest low over the past 9 periods. 
+      - When the price is above the Tenkan-sen, it suggests a bullish trend.
+      - When the price is below, it suggests a bearish trend.
+
+    - **Kijun-sen (Base Line):** A medium-term trend indicator. It calculates the average of the highest high and lowest low over the past 26 periods.
+      - This line acts as a dynamic support or resistance level.
+      - A crossover between the Tenkan-sen and Kijun-sen can generate buy (bullish crossover) or sell (bearish crossover) signals.
+
+    - **Senkou Span A & B (Cloud):** The "Cloud" is the area between Span A and Span B.
+      - **Bullish Cloud:** Span A is above Span B, and the cloud is typically green.
+      - **Bearish Cloud:** Span B is above Span A, and the cloud is typically red.
+      - The thickness of the cloud represents the strength of the trend. A thin cloud may indicate weaker support/resistance, while a thicker cloud suggests stronger support/resistance.
+      - If the price is above the cloud, the trend is bullish. If below, it is bearish.
+
+    - **Chikou Span (Lagging Line):** The current price shifted 26 periods into the past.
+      - If the Chikou Span is above the price, it confirms a bullish trend.
+      - If it is below, it confirms a bearish trend.
+
+    ### Key Signals:
+    1. **Bullish Signal:** Tenkan-sen crosses above Kijun-sen, and the price is above the cloud.
+    2. **Bearish Signal:** Tenkan-sen crosses below Kijun-sen, and the price is below the cloud.
+    3. **Neutral Trend:** The price is within the cloud, suggesting consolidation or indecision.
+
+    The Ichimoku Cloud helps visualize support, resistance, momentum, and trend direction all in one glance, making it a powerful tool for technical analysis.
+    """
+)
     
     # Descriptive Statistics and Correlation
 st.subheader("Exploratory Data Analysis")
