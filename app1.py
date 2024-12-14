@@ -20,25 +20,25 @@ st.markdown(
     <style>
         /* Imposta il colore di sfondo principale */
         .main {
-            background-color: #000000;
-            color: #ffffff;
+            background-color: #000000 !important;
+            color: #ffffff !important;
         }
         /* Personalizza il colore del testo */
         .css-1d391kg {
-            color: #ffffff;
+            color: #ffffff !important;
         }
         /* Imposta il colore di sfondo della sidebar */
-        .sidebar .sidebar-content {
-            background-color: #292a2d;
+        .css-1y9i35k {
+            background-color: #292a2d !important;
         }
         /* Imposta il colore principale (pulsanti, link) */
         .stButton>button {
-            background-color: #904bff;
-            color: white;
+            background-color: #904bff !important;
+            color: white !important;
         }
         /* Imposta il font */
         body {
-            font-family: "serif";
+            font-family: "serif" !important;
         }
     </style>
     """, unsafe_allow_html=True
