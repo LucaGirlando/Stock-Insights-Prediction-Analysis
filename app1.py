@@ -11,6 +11,39 @@ from arch import arch_model
 import seaborn as sns
 import plotly.graph_objects as go
 
+# Configurazione della pagina
+st.set_page_config(page_title="Stock Insights: Prediction & Technical Analysis", page_icon="📈", layout="wide")
+
+# Personalizzazione del tema tramite CSS
+st.markdown(
+    """
+    <style>
+        /* Imposta il colore di sfondo principale */
+        .main {
+            background-color: #000000;
+            color: #ffffff;
+        }
+        /* Personalizza il colore del testo */
+        .css-1d391kg {
+            color: #ffffff;
+        }
+        /* Imposta il colore di sfondo della sidebar */
+        .sidebar .sidebar-content {
+            background-color: #292a2d;
+        }
+        /* Imposta il colore principale (pulsanti, link) */
+        .stButton>button {
+            background-color: #904bff;
+            color: white;
+        }
+        /* Imposta il font */
+        body {
+            font-family: "serif";
+        }
+    </style>
+    """, unsafe_allow_html=True
+)
+
 st.markdown("""
     <p style="font-size: 12px; text-align: center;">
         Created by: <a href="https://www.linkedin.com/in/luca-girlando-775463302/" target="_blank">Luca Girlando</a>
