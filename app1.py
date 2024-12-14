@@ -1,3 +1,4 @@
+# App Stock Analysis
 import streamlit as st
 import pandas as pd
 import yfinance as yf
@@ -7,6 +8,8 @@ from datetime import date, timedelta
 import numpy as np
 from statsmodels.tsa.arima.model import ARIMA
 from arch import arch_model
+import seaborn as sns
+import plotly.graph_objects as go
 
 st.markdown("""
     <p style="font-size: 12px; text-align: center;">
@@ -120,6 +123,8 @@ else:
         "- **Weekly seasonality**: Displays weekly patterns or variations in the stock price."
     )
 
+
+
     # Compare with other stocks in the same period
     st.subheader(f"Price Comparison: {ticker} vs. Other Stocks")
 
@@ -137,89 +142,323 @@ else:
     for comp_ticker, comp_data in comparison_data.items():
         merged_data = merged_data.merge(comp_data[['ds', comp_ticker]], on='ds', how='left')
 
-    # Plot comparison data
-    fig, ax = plt.subplots(figsize=(10, 6))
-    ax.plot(merged_data['ds'], merged_data['y'], label=f"{ticker} Price", color="black", linewidth=1)
-    for comp_ticker in comparison_tickers:
-        if comp_ticker in merged_data.columns:
-            ax.plot(merged_data['ds'], merged_data[comp_ticker], label=f"{comp_ticker} Price")
-    ax.set_xlabel("Date")
-    ax.set_ylabel("Price")
-    ax.legend()
-    st.pyplot(fig)
+    # Create Plotly figure
+fig = go.Figure()
+
+# Plot primary ticker price
+fig.add_trace(go.Scatter(
+    x=merged_data['ds'], 
+    y=merged_data['y'], 
+    mode='lines', 
+    name=f"{ticker} Price", 
+    line=dict(color="black", width=1)
+))
+
+# Plot comparison tickers
+for comp_ticker in comparison_tickers:
+    if comp_ticker in merged_data.columns:
+        fig.add_trace(go.Scatter(
+            x=merged_data['ds'], 
+            y=merged_data[comp_ticker], 
+            mode='lines', 
+            name=f"{comp_ticker} Price"
+        ))
+
+# Layout customization
+fig.update_layout(
+    title=f"Comparison of {ticker} and Other Tickers",
+    xaxis_title="Date",
+    yaxis_title="Price",
+    legend_title="Tickers",
+    template="plotly_white",
+    hovermode="x unified",  # Unified hover for comparison
+    width=900,
+    height=600
+)
+
+# Display in Streamlit
+st.plotly_chart(fig)
 
     # Technical Indicators
-    st.subheader("Technical Indicators")
-    st.markdown(
+st.subheader("Technical Indicators")
+st.markdown(
         "This section displays several technical indicators to analyze the historical data of the selected stock."
     )
 
     # Calculate Simple Moving Average (SMA), Exponential Moving Average (EMA), and Bollinger Bands
-    data['SMA_50'] = data['y'].rolling(window=50).mean()
-    data['EMA_50'] = data['y'].ewm(span=50, adjust=False).mean()
+data['SMA_50'] = data['y'].rolling(window=50).mean()
+data['EMA_50'] = data['y'].ewm(span=50, adjust=False).mean()
 
     # Calculate Bollinger Bands
-    data['Bollinger_Mid'] = data['SMA_50']
-    data['Bollinger_Upper'] = data['Bollinger_Mid'] + 2 * data['y'].rolling(window=50).std()
-    data['Bollinger_Lower'] = data['Bollinger_Mid'] - 2 * data['y'].rolling(window=50).std()
+data['Bollinger_Mid'] = data['SMA_50']
+data['Bollinger_Upper'] = data['Bollinger_Mid'] + 2 * data['y'].rolling(window=50).std()
+data['Bollinger_Lower'] = data['Bollinger_Mid'] - 2 * data['y'].rolling(window=50).std()
 
-    # Plot the indicators with thinner lines
-    fig, ax = plt.subplots(figsize=(10, 6))
-    ax.plot(data['ds'], data['y'], label="Stock Price", color="black", linewidth=1)
-    ax.plot(data['ds'], data['SMA_50'], label="50-Day SMA", color="orange", linewidth=1)
-    ax.plot(data['ds'], data['EMA_50'], label="50-Day EMA", color="red", linewidth=1)
-    ax.fill_between(data['ds'], data['Bollinger_Lower'], data['Bollinger_Upper'], color="gray", alpha=0.2)
-    ax.set_xlabel("Date")
-    ax.set_ylabel("Price")
-    ax.legend()
-    st.pyplot(fig)
+    # Plot the indicators with Plotly
+fig = go.Figure()
 
-    st.subheader("How to interpret the technical indicators:")
-    st.markdown(
+# Stock Price
+fig.add_trace(go.Scatter(
+    x=data['ds'], 
+    y=data['y'], 
+    mode='lines', 
+    name="Stock Price", 
+    line=dict(color="black", width=1)
+))
+
+# 50-Day SMA
+fig.add_trace(go.Scatter(
+    x=data['ds'], 
+    y=data['SMA_50'], 
+    mode='lines', 
+    name="50-Day SMA", 
+    line=dict(color="orange", width=1)
+))
+
+# 50-Day EMA
+fig.add_trace(go.Scatter(
+    x=data['ds'], 
+    y=data['EMA_50'], 
+    mode='lines', 
+    name="50-Day EMA", 
+    line=dict(color="red", width=1)
+))
+
+# Bollinger Bands (Shaded Area)
+fig.add_trace(go.Scatter(
+    x=data['ds'], 
+    y=data['Bollinger_Upper'], 
+    mode='lines', 
+    name="Bollinger Upper", 
+    line=dict(color="gray", width=0.5),
+    showlegend=False
+))
+
+fig.add_trace(go.Scatter(
+    x=data['ds'], 
+    y=data['Bollinger_Lower'], 
+    mode='lines', 
+    name="Bollinger Lower", 
+    line=dict(color="gray", width=0.5),
+    fill='tonexty',  # Fill between the upper and lower bands
+    fillcolor='rgba(128, 128, 128, 0.2)',  # Transparent gray
+    showlegend=False
+))
+
+# Layout customization
+fig.update_layout(
+    title="Indicators: SMA, EMA, and Bollinger Bands",
+    xaxis_title="Date",
+    yaxis_title="Price",
+    legend_title="Legend",
+    template="plotly_white",  # Clean aesthetic theme
+    hovermode="x unified",  # Unified hover for easier comparison
+    width=900,
+    height=600
+)
+
+# Display in Streamlit
+st.plotly_chart(fig)
+
+st.subheader("How to interpret the technical indicators:")
+st.markdown(
         "- **SMA (Simple Moving Average)**: A simple average of the stock price over a specified period, often used to identify trends.\n"
         "- **EMA (Exponential Moving Average)**: A weighted moving average that gives more importance to recent prices.\n"
         "- **Bollinger Bands**: Two bands (upper and lower) that represent the price volatility. The stock is considered overbought when it is near the upper band and oversold near the lower band."
     )
 
     # Ichimoku Cloud Analysis
-    st.subheader("Ichimoku Cloud Analysis")
-    st.markdown(
+st.subheader("Ichimoku Cloud Analysis")
+st.markdown(
         "The Ichimoku Cloud is a technical analysis tool that defines support and resistance levels, identifies trend direction, and provides buy and sell signals. It consists of five lines: Tenkan-sen (Conversion Line), Kijun-sen (Base Line), Senkou Span A, Senkou Span B, and Chikou Span."
     )
 
     # Calculate Ichimoku Cloud components
-    high_9 = data['y'].rolling(window=9).max()
-    low_9 = data['y'].rolling(window=9).min()
-    data['Tenkan_sen'] = (high_9 + low_9) / 2
+high_9 = data['y'].rolling(window=9).max()
+low_9 = data['y'].rolling(window=9).min()
+data['Tenkan_sen'] = (high_9 + low_9) / 2
 
-    high_26 = data['y'].rolling(window=26).max()
-    low_26 = data['y'].rolling(window=26).min()
-    data['Kijun_sen'] = (high_26 + low_26) / 2
+high_26 = data['y'].rolling(window=26).max()
+low_26 = data['y'].rolling(window=26).min()
+data['Kijun_sen'] = (high_26 + low_26) / 2
 
-    data['Senkou_Span_A'] = ((data['Tenkan_sen'] + data['Kijun_sen']) / 2).shift(26)
-    high_52 = data['y'].rolling(window=52).max()
-    low_52 = data['y'].rolling(window=52).min()
-    data['Senkou_Span_B'] = ((high_52 + low_52) / 2).shift(26)
-    data['Chikou_Span'] = data['y'].shift(-26)
+data['Senkou_Span_A'] = ((data['Tenkan_sen'] + data['Kijun_sen']) / 2).shift(26)
+high_52 = data['y'].rolling(window=52).max()
+low_52 = data['y'].rolling(window=52).min()
+data['Senkou_Span_B'] = ((high_52 + low_52) / 2).shift(26)
+data['Chikou_Span'] = data['y'].shift(-26)
 
-    # Plot Ichimoku Cloud with thinner lines
-    fig, ax = plt.subplots(figsize=(10, 6))
-    ax.plot(data['ds'], data['y'], label="Stock Price", color="black", linewidth=1)
-    ax.plot(data['ds'], data['Tenkan_sen'], label="Tenkan-sen (Conversion Line)", color="blue", linewidth=1)
-    ax.plot(data['ds'], data['Kijun_sen'], label="Kijun-sen (Base Line)", color="red", linewidth=1)
-    ax.fill_between(data['ds'], data['Senkou_Span_A'], data['Senkou_Span_B'], color="green", alpha=0.2)
-    ax.plot(data['ds'], data['Chikou_Span'], label="Chikou Span (Lagging Line)", color="purple", linewidth=1)
-    ax.legend()  # Add the legend for Senkou Span A and B
-    ax.set_xlabel("Date")
-    ax.set_ylabel("Price")
-    st.pyplot(fig)
+    # Plot Ichimoku Cloud with Plotly
+fig = go.Figure()
 
-    st.subheader("How to interpret the Ichimoku Cloud:")
-    st.markdown(
-    """
-    - **Tenkan-sen (Conversion Line)**: A fast-moving average.
-    - **Kijun-sen (Base Line)**: A slower-moving average.
-    - **Senkou Span A & B (Cloud)**: The space between these two lines forms the Ichimoku Cloud, which helps identify trends. A stock is in an uptrend if the price is above the cloud and in a downtrend if below.
-    - **Chikou Span (Lagging Line)**: Shows the current price relative to historical prices.
-    """
-    )
+# Stock Price
+fig.add_trace(go.Scatter(
+    x=data['ds'], 
+    y=data['y'], 
+    mode='lines', 
+    name="Stock Price", 
+    line=dict(color="black", width=1)
+))
+
+# Tenkan-sen (Conversion Line)
+fig.add_trace(go.Scatter(
+    x=data['ds'], 
+    y=data['Tenkan_sen'], 
+    mode='lines', 
+    name="Tenkan-sen (Conversion Line)", 
+    line=dict(color="blue", width=1)
+))
+
+# Kijun-sen (Base Line)
+fig.add_trace(go.Scatter(
+    x=data['ds'], 
+    y=data['Kijun_sen'], 
+    mode='lines', 
+    name="Kijun-sen (Base Line)", 
+    line=dict(color="red", width=1)
+))
+
+# Senkou Span A and B (Ichimoku Cloud)
+fig.add_trace(go.Scatter(
+    x=data['ds'], 
+    y=data['Senkou_Span_A'], 
+    mode='lines', 
+    name="Senkou Span A", 
+    line=dict(color="green", width=0.5),
+    showlegend=False
+))
+
+fig.add_trace(go.Scatter(
+    x=data['ds'], 
+    y=data['Senkou_Span_B'], 
+    mode='lines', 
+    name="Senkou Span B", 
+    line=dict(color="orange", width=0.5),
+    showlegend=False,
+    fill='tonexty',  # Fill the area between Senkou Span A and B
+    fillcolor='rgba(0, 255, 0, 0.2)'  # Transparent green
+))
+
+# Chikou Span (Lagging Line)
+fig.add_trace(go.Scatter(
+    x=data['ds'], 
+    y=data['Chikou_Span'], 
+    mode='lines', 
+    name="Chikou Span (Lagging Line)", 
+    line=dict(color="purple", width=1)
+))
+
+# Layout customization
+fig.update_layout(
+    title="Ichimoku Cloud",
+    xaxis_title="Date",
+    yaxis_title="Price",
+    legend_title="Legend",
+    template="plotly_white",  # Clean aesthetic theme
+    hovermode="x unified",  # Unified hover for easier comparison
+    width=900,
+    height=600
+)
+
+# Display in Streamlit
+st.plotly_chart(fig)
+    
+    # Descriptive Statistics and Correlation
+st.subheader("Exploratory Data Analysis")
+def descriptive_statistics(data):
+        st.write("Descriptive Statistics:")
+        st.write(data.describe())
+
+def correlation_matrix(data):
+        st.write("Correlation Matrix:")
+        plt.figure(figsize=(10, 6))
+        sns.heatmap(data.corr(), annot=True, cmap='coolwarm')
+        st.pyplot(plt)
+
+descriptive_statistics(data)
+correlation_matrix(data)
+
+def calculate_metrics(data):
+        returns = data.pct_change().dropna()
+        annualized_return = returns.mean() * 252
+        volatility = returns.std() * np.sqrt(252)
+        sharpe_ratio = annualized_return / volatility
+        max_drawdown = (data / data.cummax() - 1).min()
+
+        st.write("Risk and Return Metrics:")
+        st.write(f"Average Annualized Return: {annualized_return.mean():.2%}")
+        st.write(f"Average Annualized Volatility: {volatility.mean():.2%}")
+        st.write(f"Average Sharpe Ratio: {sharpe_ratio.mean():.2f}")
+        st.write(f"Average Maximum Drawdown: {max_drawdown.mean():.2%}")
+
+        st.subheader("Risk and Return Metrics")
+        calculate_metrics(data)
+    
+    # Interpretation of Descriptive Statistics and Heatmap
+"""
+The descriptive statistics table provides key insights into the distribution and variability of each variable:
+
+- **Mean**: The average value, indicating the central tendency of the data.
+- **Standard Deviation (std)**: Measures the spread of the data. A higher value indicates greater variability.
+- **Min/Max**: The minimum and maximum values, showing the range of the data.
+- **25%, 50%, 75% (Quartiles)**: Divide the data into four equal parts, helping to understand the distribution.
+
+The correlation heatmap visually represents the relationships between variables:
+
+- **Correlation Coefficients**: Values range from -1 to 1.
+    - A coefficient close to 1 implies a strong positive correlation (as one variable increases, the other also increases).
+    - A coefficient close to -1 implies a strong negative correlation (as one variable increases, the other decreases).
+    - A coefficient near 0 indicates little or no linear relationship.
+- **Color Intensity**: Darker or brighter shades represent stronger correlations. For instance, darker red indicates strong negative correlation, while brighter blue indicates strong positive correlation.
+
+By analyzing both outputs, you can identify patterns, outliers, and relationships in the data, guiding further analysis or decision-making."""
+
+
+import random
+
+# Function for Monte Carlo simulation of the stock price
+def monte_carlo_simulation(data, forecast_period, num_simulations=1000):
+    # Calculate daily log returns
+    data['daily_returns'] = np.log(data['y'] / data['y'].shift(1))
+    daily_return_mean = data['daily_returns'].mean()
+    daily_volatility = data['daily_returns'].std()
+
+    # Monte Carlo simulation
+    simulations = np.zeros((num_simulations, forecast_period))
+    last_price = data['y'].iloc[-1]
+
+    for i in range(num_simulations):
+        price_series = [last_price]
+        for j in range(forecast_period):
+            # Calculate the next price using mean return and volatility
+            price_next = price_series[-1] * np.exp(daily_return_mean + daily_volatility * np.random.normal())
+            price_series.append(price_next)
+        simulations[i, :] = price_series[1:]  # Ignore the first price (initial)
+
+    return simulations
+
+# Monte Carlo simulation
+st.subheader(f"Monte Carlo Simulation for {ticker}")
+simulations = monte_carlo_simulation(data, forecast_period)
+
+# Create a plot for the simulations
+fig, ax = plt.subplots(figsize=(10, 6))
+for i in range(simulations.shape[0]):
+    ax.plot(range(forecast_period), simulations[i, :], color='blue', alpha=0.1)  # Plot each simulation
+
+# Show the average simulation
+mean_simulation = simulations.mean(axis=0)
+ax.plot(range(forecast_period), mean_simulation, color='red', label="Mean Simulation", lw=2)
+
+# Layout the plot
+ax.set_title(f"Monte Carlo Simulations of Future Price for {ticker}")
+ax.set_xlabel("Days")
+ax.set_ylabel("Price")
+ax.legend()
+st.pyplot(fig)
+
+# Description for interpreting the graph
+st.markdown(
+    "- Each blue line represents a simulation of the future price.\n"
+    "- The red line represents the average of the simulations."
+)
