@@ -384,7 +384,7 @@ st.markdown(
       - If the Chikou Span is above the price, it confirms a bullish trend.
       - If it is below, it confirms a bearish trend.
 
-    ### Key Signals:
+    **Key Signals:**
     1. **Bullish Signal:** Tenkan-sen crosses above Kijun-sen, and the price is above the cloud.
     2. **Bearish Signal:** Tenkan-sen crosses below Kijun-sen, and the price is below the cloud.
     3. **Neutral Trend:** The price is within the cloud, suggesting consolidation or indecision.
