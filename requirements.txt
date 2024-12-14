@@ -5,3 +5,5 @@ prophet
 matplotlib
 statsmodels
 arch
+plotly
+seaborn
