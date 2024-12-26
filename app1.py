@@ -81,32 +81,24 @@ else:
 
 
 
-# Verifica se 'Adj Close' è presente nel DataFrame
-if 'Adj Close' in data.columns:
-    data = data[['Adj Close']].reset_index()
-else:
-    raise KeyError("'Adj Close' column not found in the DataFrame. Please check the input data.")
-    
-st.write("Columns in DataFrame:", data.columns)
 
-if 'Adj Close' in data.columns:
-    data = data[['Adj Close']].reset_index()
-elif 'Close' in data.columns:  # Usa una colonna alternativa
-    st.warning("Using 'Close' column instead of 'Adj Close'.")
-    data = data[['Close']].reset_index()
-else:
-    st.error("'Adj Close' or 'Close' column not found in the DataFrame.")
-    st.stop()  # Ferma l'esecuzione dell'app se nessuna colonna è valida
 
+# Controllo dati caricati e preview
 if data.empty:
-    st.error("The data file is empty or not loaded correctly. Please check the input.")
+    st.error("The data is empty. Please check your input file or data source.")
     st.stop()
 
-try:
+st.write("Preview of the loaded data:")
+st.dataframe(data.head())
+
+# Verifica e utilizzo della colonna 'Adj Close'
+if 'Adj Close' in data.columns:
     data = data[['Adj Close']].reset_index()
-except KeyError:
-    st.error("The 'Adj Close' column is missing. Please check your data source.")
+else:
+    st.error("'Adj Close' column not found in the DataFrame. Please check your data source.")
     st.stop()
+    
+
 
     
 
