@@ -135,7 +135,7 @@ else:
     for comp_ticker in comparison_tickers:
         comp_data, _ = download_data(comp_ticker, historical_range)
         if not comp_data.empty:
-            comparison_data[comp_ticker] = comp_data[['Adj Close']].reset_index()
+            comparison_data[comp_ticker] = comp_data[['Close']].reset_index()
             comparison_data[comp_ticker].columns = ['ds', comp_ticker]
             comparison_data[comp_ticker]['ds'] = pd.to_datetime(comparison_data[comp_ticker]['ds'])
     
