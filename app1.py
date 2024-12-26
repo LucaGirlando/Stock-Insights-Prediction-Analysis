@@ -79,31 +79,6 @@ else:
             f"Data for the last {historical_range} years is not available. Using data from the last {actual_years} years instead."
         )
 
-
-
-
-
-# Controllo dati caricati e preview
-if data.empty:
-    st.error("The data is empty. Please check your input file or data source.")
-    st.stop()
-
-st.write("Preview of the loaded data:")
-st.dataframe(data.head())
-
-# Verifica e utilizzo della colonna 'Adj Close' o alternativa
-if 'Close' in data.columns:
-    # Usa 'Close' al posto di 'Adj Close'
-    data['Adj Close'] = data['Close']  # Puoi calcolare 'Adj Close' se necessario
-    data = data[['Adj Close']].reset_index()
-else:
-    st.error("'Close' column not found in the DataFrame. Please check your data source.")
-    st.stop()
-    
-
-
-    
-
     
     # Prepare data for Prophet
     data = data[['Adj Close']].reset_index()
@@ -171,30 +146,6 @@ else:
 
     # Create Plotly figure
 fig = go.Figure()
-
-
-
-
-# Controllo se i DataFrame contengono colonne comuni
-print("Contenuto di df1:")
-print(df1.head())
-print("Colonne di df1:", df1.columns)
-
-print("Contenuto di df2:")
-print(df2.head())
-print("Colonne di df2:", df2.columns)
-
-# Verifica se le colonne comuni esistono in entrambi i DataFrame
-common_column = 'nome_colonna_comune'  # Sostituisci con il nome effettivo della colonna
-if common_column in df1.columns and common_column in df2.columns:
-    print(f"La colonna '{common_column}' esiste in entrambi i DataFrame.")
-else:
-    raise ValueError(f"La colonna '{common_column}' non è presente in entrambi i DataFrame.")
-
-
-
-
-
 
 
 # Plot primary ticker price
