@@ -175,18 +175,17 @@ fig = go.Figure()
 
 
 
-# Controllo esistenza di merged_data
 try:
+    # Fusione dei dati
+    merged_data = pd.merge(df1, df2, on='common_column', how='inner')  # Modifica secondo il tuo caso
+
+    # Debug dopo la fusione
+    print("Debug: merged_data creato con successo.")
     print(merged_data.head())
-except NameError:
-    raise ValueError("The variable 'merged_data' is not defined. Please check your data processing logic.")
 
-# Assicurati che 'ds' sia una colonna valida
-if 'ds' not in merged_data.columns:
-    raise KeyError("'ds' column not found in 'merged_data'. Please check your input data.")
+except Exception as e:
+    raise ValueError(f"Errore durante la creazione di 'merged_data': {e}")
 
-# Utilizzo
-x = merged_data['ds']
 
 
 
