@@ -172,6 +172,25 @@ else:
     # Create Plotly figure
 fig = go.Figure()
 
+
+
+
+# Controllo esistenza di merged_data
+try:
+    print(merged_data.head())
+except NameError:
+    raise ValueError("The variable 'merged_data' is not defined. Please check your data processing logic.")
+
+# Assicurati che 'ds' sia una colonna valida
+if 'ds' not in merged_data.columns:
+    raise KeyError("'ds' column not found in 'merged_data'. Please check your input data.")
+
+# Utilizzo
+x = merged_data['ds']
+
+
+
+
 # Plot primary ticker price
 fig.add_trace(go.Scatter(
     x=merged_data['ds'], 
