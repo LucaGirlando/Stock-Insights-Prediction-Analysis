@@ -79,6 +79,13 @@ else:
             f"Data for the last {historical_range} years is not available. Using data from the last {actual_years} years instead."
         )
 
+# Verifica se 'Adj Close' è presente nel DataFrame
+if 'Adj Close' in data.columns:
+    data = data[['Adj Close']].reset_index()
+else:
+    raise KeyError("'Adj Close' column not found in the DataFrame. Please check the input data.")
+
+    
     # Prepare data for Prophet
     data = data[['Adj Close']].reset_index()
     data.columns = ['ds', 'y']
