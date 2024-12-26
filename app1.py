@@ -175,7 +175,21 @@ fig = go.Figure()
 
 
 
-print(df.head())
+# Controllo se i DataFrame contengono colonne comuni
+print("Contenuto di df1:")
+print(df1.head())
+print("Colonne di df1:", df1.columns)
+
+print("Contenuto di df2:")
+print(df2.head())
+print("Colonne di df2:", df2.columns)
+
+# Verifica se le colonne comuni esistono in entrambi i DataFrame
+common_column = 'nome_colonna_comune'  # Sostituisci con il nome effettivo della colonna
+if common_column in df1.columns and common_column in df2.columns:
+    print(f"La colonna '{common_column}' esiste in entrambi i DataFrame.")
+else:
+    raise ValueError(f"La colonna '{common_column}' non è presente in entrambi i DataFrame.")
 
 
 
