@@ -81,7 +81,7 @@ else:
 
     
     # Prepare data for Prophet
-    data = data[['Adj Close']].reset_index()
+    data = data[['Close']].reset_index()
     data.columns = ['ds', 'y']
     data['ds'] = pd.to_datetime(data['ds'])
     data['y'] = pd.to_numeric(data['y'], errors='coerce')
