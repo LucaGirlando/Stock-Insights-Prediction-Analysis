@@ -176,15 +176,31 @@ fig = go.Figure()
 
 
 try:
-    # Fusione dei dati
-    merged_data = pd.merge(df1, df2, on='common_column', how='inner')  # Modifica secondo il tuo caso
+    # Stampa i DataFrame coinvolti
+    print("Debug: Contenuto di df1:")
+    print(df1.head())
+    print("Debug: Colonne di df1:", df1.columns)
+
+    print("Debug: Contenuto di df2:")
+    print(df2.head())
+    print("Debug: Colonne di df2:", df2.columns)
+
+    # Verifica l'esistenza delle colonne di unione
+    common_column = 'common_column'  # Sostituisci con il nome reale della colonna
+    if common_column not in df1.columns or common_column not in df2.columns:
+        raise KeyError(f"La colonna comune '{common_column}' non esiste in uno dei DataFrame.")
+
+    # Effettua la fusione
+    merged_data = pd.merge(df1, df2, on=common_column, how='inner')
 
     # Debug dopo la fusione
     print("Debug: merged_data creato con successo.")
     print(merged_data.head())
 
 except Exception as e:
+    # Riporta il tipo di errore e il messaggio
     raise ValueError(f"Errore durante la creazione di 'merged_data': {e}")
+
 
 
 
