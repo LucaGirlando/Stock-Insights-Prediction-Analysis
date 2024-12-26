@@ -91,11 +91,13 @@ if data.empty:
 st.write("Preview of the loaded data:")
 st.dataframe(data.head())
 
-# Verifica e utilizzo della colonna 'Adj Close'
-if 'Adj Close' in data.columns:
+# Verifica e utilizzo della colonna 'Adj Close' o alternativa
+if 'Close' in data.columns:
+    # Usa 'Close' al posto di 'Adj Close'
+    data['Adj Close'] = data['Close']  # Puoi calcolare 'Adj Close' se necessario
     data = data[['Adj Close']].reset_index()
 else:
-    st.error("'Adj Close' column not found in the DataFrame. Please check your data source.")
+    st.error("'Close' column not found in the DataFrame. Please check your data source.")
     st.stop()
     
 
