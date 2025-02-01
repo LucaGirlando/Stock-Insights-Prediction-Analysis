@@ -79,9 +79,8 @@ else:
             f"Data for the last {historical_range} years is not available. Using data from the last {actual_years} years instead."
         )
 
-    
     # Prepare data for Prophet
-    data = data[['Close']].reset_index()
+    data = data[['Adj Close']].reset_index()
     data.columns = ['ds', 'y']
     data['ds'] = pd.to_datetime(data['ds'])
     data['y'] = pd.to_numeric(data['y'], errors='coerce')
@@ -128,58 +127,67 @@ else:
 
 
     # Compare with other stocks in the same period
-    st.subheader(f"Price Comparison: {ticker} vs. Other Stocks")
+st.subheader(f"Growth Comparison: {ticker} vs. Other Stocks")
 
-    # Download data for comparison tickers
-    comparison_data = {}
-    for comp_ticker in comparison_tickers:
-        comp_data, _ = download_data(comp_ticker, historical_range)
-        if not comp_data.empty:
-            comparison_data[comp_ticker] = comp_data[['Close']].reset_index()
-            comparison_data[comp_ticker].columns = ['ds', comp_ticker]
-            comparison_data[comp_ticker]['ds'] = pd.to_datetime(comparison_data[comp_ticker]['ds'])
-    
-    # Merge all data for comparison
-    merged_data = data[['ds', 'y']].copy()
-    for comp_ticker, comp_data in comparison_data.items():
-        merged_data = merged_data.merge(comp_data[['ds', comp_ticker]], on='ds', how='left')
+# Download data for comparison tickers
+comparison_data = {}
+for comp_ticker in comparison_tickers:
+    comp_data, _ = download_data(comp_ticker, historical_range)
+    if not comp_data.empty:
+        comp_data = comp_data[['Adj Close']].reset_index()
+        comp_data.columns = ['ds', comp_ticker]
+        comp_data['ds'] = pd.to_datetime(comp_data['ds'])
 
-    # Create Plotly figure
+        # Calcolo della crescita percentuale
+        initial_price = comp_data[comp_ticker].iloc[0]  # Valore iniziale
+        comp_data[comp_ticker] = (comp_data[comp_ticker] / initial_price - 1) * 100  # % growth
+
+        comparison_data[comp_ticker] = comp_data
+
+# Normalizzazione del ticker principale
+merged_data = data[['ds', 'y']].copy()
+initial_price_main = merged_data['y'].iloc[0]  
+merged_data['y'] = (merged_data['y'] / initial_price_main - 1) * 100  # % growth
+
+# Merge con gli altri tickers
+for comp_ticker, comp_data in comparison_data.items():
+    merged_data = merged_data.merge(comp_data[['ds', comp_ticker]], on='ds', how='left')
+
+# Creazione della figura con Plotly
 fig = go.Figure()
 
-
-# Plot primary ticker price
+# Plot principale (ticker selezionato)
 fig.add_trace(go.Scatter(
     x=merged_data['ds'], 
     y=merged_data['y'], 
     mode='lines', 
-    name=f"{ticker} Price", 
+    name=f"{ticker} Growth (%)", 
     line=dict(color="black", width=1)
 ))
 
-# Plot comparison tickers
+# Plot degli altri titoli per confronto
 for comp_ticker in comparison_tickers:
     if comp_ticker in merged_data.columns:
         fig.add_trace(go.Scatter(
             x=merged_data['ds'], 
             y=merged_data[comp_ticker], 
             mode='lines', 
-            name=f"{comp_ticker} Price"
+            name=f"{comp_ticker} Growth (%)"
         ))
 
-# Layout customization
+# Layout del grafico
 fig.update_layout(
-    title=f"Comparison of {ticker} and Other Tickers",
+    title=f"Percentage Growth Comparison: {ticker} vs. Other Tickers",
     xaxis_title="Date",
-    yaxis_title="Price",
+    yaxis_title="Growth (%)",
     legend_title="Tickers",
     template="plotly_white",
-    hovermode="x unified",  # Unified hover for comparison
+    hovermode="x unified",
     width=900,
     height=600
 )
 
-# Display in Streamlit
+# Mostra il grafico in Streamlit
 st.plotly_chart(fig)
 
     # Technical Indicators
