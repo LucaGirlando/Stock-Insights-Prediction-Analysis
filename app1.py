@@ -80,7 +80,7 @@ else:
         )
 
     # Prepare data for Prophet
-    data = data[['Adj Close']].reset_index()
+    data = data[['Close']].reset_index()
     data.columns = ['ds', 'y']
     data['ds'] = pd.to_datetime(data['ds'])
     data['y'] = pd.to_numeric(data['y'], errors='coerce')
@@ -134,7 +134,7 @@ comparison_data = {}
 for comp_ticker in comparison_tickers:
     comp_data, _ = download_data(comp_ticker, historical_range)
     if not comp_data.empty:
-        comp_data = comp_data[['Adj Close']].reset_index()
+        comp_data = comp_data[['Close']].reset_index()
         comp_data.columns = ['ds', comp_ticker]
         comp_data['ds'] = pd.to_datetime(comp_data['ds'])
 
