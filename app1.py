@@ -125,8 +125,7 @@ else:
     )
 
 
-
-    # Compare with other stocks in the same period
+# Compare with other stocks in the same period
 st.subheader(f"Growth Comparison: {ticker} vs. Other Stocks")
 
 # Download data for comparison tickers
@@ -184,11 +183,26 @@ fig.update_layout(
     template="plotly_white",
     hovermode="x unified",
     width=900,
-    height=600
+    height=600,
+    yaxis=dict(autorange=True, fixedrange=False),
+    xaxis=dict(
+        rangeselector=dict(
+            buttons=list([
+                # Pulsanti predefiniti per intervalli di tempo comuni
+                dict(count=1, label="1m", step="month", stepmode="backward"),
+                dict(count=6, label="6m", step="month", stepmode="backward"),
+                dict(count=1, label="YTD", step="year", stepmode="todate"),
+                dict(count=1, label="1y", step="year", stepmode="backward"),
+                dict(step="all", label="All")  # Mostra tutti i dati
+            ])
+        ),
+        rangeslider=dict(visible=True),  
+        type="date"  
+    )
 )
 
 # Mostra il grafico in Streamlit
-st.plotly_chart(fig)
+st.plotly_chart(fig, use_container_width=True)
 
     # Technical Indicators
 st.subheader("Technical Indicators")
@@ -204,6 +218,12 @@ data['EMA_50'] = data['y'].ewm(span=50, adjust=False).mean()
 data['Bollinger_Mid'] = data['SMA_50']
 data['Bollinger_Upper'] = data['Bollinger_Mid'] + 2 * data['y'].rolling(window=50).std()
 data['Bollinger_Lower'] = data['Bollinger_Mid'] - 2 * data['y'].rolling(window=50).std()
+
+# Assicurati che la colonna 'ds' sia di tipo datetime
+data['ds'] = pd.to_datetime(data['ds'], errors='coerce')
+
+# Rimuovi eventuali righe con valori NaT (timestamp non validi)
+data = data.dropna(subset=['ds'])
 
     # Plot the indicators with Plotly
 fig = go.Figure()
@@ -265,7 +285,20 @@ fig.update_layout(
     template="plotly_white",  # Clean aesthetic theme
     hovermode="x unified",  # Unified hover for easier comparison
     width=900,
-    height=600
+    height=600,
+    xaxis=dict(
+        rangeselector=dict(
+            buttons=list([
+                dict(count=1, label="1m", step="month", stepmode="backward"),
+                dict(count=6, label="6m", step="month", stepmode="backward"),
+                dict(count=1, label="YTD", step="year", stepmode="todate"),
+                dict(count=1, label="1y", step="year", stepmode="backward"),
+                dict(step="all", label="All")  
+            ])
+        ),
+        rangeslider=dict(visible=True),  
+        type="date"  
+    )
 )
 
 # Display in Streamlit
@@ -298,8 +331,14 @@ low_52 = data['y'].rolling(window=52).min()
 data['Senkou_Span_B'] = ((high_52 + low_52) / 2).shift(26)
 data['Chikou_Span'] = data['y'].shift(-26)
 
-    # Plot Ichimoku Cloud with Plotly
+# Plot Ichimoku Cloud with Plotly
 fig = go.Figure()
+
+# Assicurati che la colonna 'ds' sia di tipo datetime
+data['ds'] = pd.to_datetime(data['ds'], errors='coerce')
+
+# Rimuovi eventuali righe con valori NaT (timestamp non validi)
+data = data.dropna(subset=['ds'])
 
 # Stock Price
 fig.add_trace(go.Scatter(
@@ -367,7 +406,20 @@ fig.update_layout(
     template="plotly_white",  # Clean aesthetic theme
     hovermode="x unified",  # Unified hover for easier comparison
     width=900,
-    height=600
+    height=600,
+    xaxis=dict(
+        rangeselector=dict(
+            buttons=list([
+                dict(count=1, label="1m", step="month", stepmode="backward"),
+                dict(count=6, label="6m", step="month", stepmode="backward"),
+                dict(count=1, label="YTD", step="year", stepmode="todate"),
+                dict(count=1, label="1y", step="year", stepmode="backward"),
+                dict(step="all", label="All")  
+            ])
+        ),
+        rangeslider=dict(visible=True),  
+        type="date"  
+    )
 )
 
 # Display in Streamlit
