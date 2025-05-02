@@ -1,6 +1,6 @@
 streamlit
 pandas
-yfinance>=0.2.18
+yfinance>=0.2.57
 prophet
 matplotlib
 statsmodels
