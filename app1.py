@@ -12,7 +12,9 @@ import seaborn as sns
 import plotly.graph_objects as go
 
 # Configurazione della pagina
-st.set_page_config(page_title="Stock Insights: Prediction & Technical Analysis", page_icon="📈", layout="wide")
+st.set_page_config(page_title="Stock Insights: Prediction & Technical Analysis", 
+                  page_icon="📈", 
+                  layout="wide")
 
 st.markdown("""
     <p style="font-size: 12px; text-align: center;">
@@ -48,161 +50,156 @@ comparison_tickers = [ticker.strip() for ticker in comparison_tickers if ticker.
 if len(comparison_tickers) > 5:
     comparison_tickers = comparison_tickers[:5]  # Limit to 5 tickers
 
-# Function to download data with fallback mechanism
+# Function to download data with robust error handling
 @st.cache_data
 def download_data(ticker, years):
-    today = date.today()
-    start_date = today - timedelta(days=years * 365)
+    try:
+        # Use period instead of start/end for more reliable downloads
+        data = yf.download(ticker, period=f"{years}y", progress=False)
+        
+        if data.empty:
+            st.warning(f"No data available for {ticker} for {years} years")
+            return pd.DataFrame(), 0
+            
+        # Process and clean data
+        data = data[['Close']].reset_index()
+        data.columns = ['ds', 'y']
+        
+        # Convert and clean datetime
+        data['ds'] = pd.to_datetime(data['ds'], errors='coerce')
+        data = data.dropna(subset=['ds'])
+        data['ds'] = data['ds'].dt.floor('s')  # Normalize timestamps
+        
+        # Clean numeric values
+        data['y'] = pd.to_numeric(data['y'], errors='coerce')
+        data = data.dropna(subset=['y'])
+        
+        return data, years
+        
+    except Exception as e:
+        st.error(f"Error downloading {ticker}: {str(e)}")
+        return pd.DataFrame(), 0
 
-    while years > 0:
-        try:
-            data = yf.download(ticker, start=start_date, end=today)
-            if not data.empty:
-                return data, years
-        except Exception as e:
-            st.warning(f"Error fetching data: {e}")
-
-        # Reduce the range and retry
-        years -= 10
-        start_date = today - timedelta(days=years * 365)
-
-    return pd.DataFrame(), 0
-
-# Fetch data for the main ticker
-data, actual_years = download_data(ticker, historical_range)
+# Fetch data for the main ticker with progress indicator
+with st.spinner(f"Fetching data for {ticker}..."):
+    data, actual_years = download_data(ticker, historical_range)
 
 if data.empty:
-    st.error("No data available for the selected stock.")
+    st.error("No data available for the selected stock. Please try a different ticker.")
+    st.stop()  # Stop execution if no data
 else:
     if actual_years < historical_range:
         st.warning(
             f"Data for the last {historical_range} years is not available. Using data from the last {actual_years} years instead."
         )
 
-    # Prepare data for Prophet
-    data = data[['Close']].reset_index()
-    data.columns = ['ds', 'y']
-    data['ds'] = pd.to_datetime(data['ds'])
-    data['y'] = pd.to_numeric(data['y'], errors='coerce')
-    data = data.dropna()
-
     # Initialize and train the Prophet model
-    m = Prophet()
-    m.fit(data)
+    with st.spinner("Training prediction model..."):
+        try:
+            m = Prophet()
+            m.fit(data)
+            
+            # Create future dataframe
+            future = m.make_future_dataframe(periods=forecast_period)
+            
+            # Forecast
+            forecast = m.predict(future)
+            
+            # Price forecast section
+            st.subheader(f"Price Forecast for {ticker}")
+            
+            # Current price
+            current_price = data['y'].iloc[-1]
+            st.write(f"**Current Price**: {current_price:.2f}")
 
-    # Create future dataframe
-    future = m.make_future_dataframe(periods=forecast_period)
+            # Plot forecast
+            fig1 = m.plot(forecast)
+            st.pyplot(fig1)
+            st.markdown(
+                "- **Blue line**: Predicted stock price.\n"
+                "- **Shaded area**: Uncertainty intervals (confidence intervals)."
+            )
 
-    # Forecast
-    forecast = m.predict(future)
-
-    # Price forecast section
-    st.subheader(f"Price Forecast for {ticker}")
-    
-    # Current price and forecasted price after the selected forecast period
-    current_price = data['y'].iloc[-1]
-    
-    st.write(f"**Current Price**: {current_price:.2f}")
-
-    # Plot forecast
-    fig1 = m.plot(forecast)
-    st.pyplot(fig1)
-
-    st.markdown(
-        "- **Blue line**: Predicted stock price.\n"
-        "- **Shaded area**: Uncertainty intervals (confidence intervals)."
-    )
-
-    # Plot components
-    st.subheader("Forecast Components")
-    fig2 = m.plot_components(forecast)
-    st.pyplot(fig2)
-
-    st.markdown(
-        "- **Trend**: Shows the overall direction of the stock price over time.\n"
-        "- **Yearly seasonality**: Highlights recurring annual patterns in the stock price.\n"
-        "- **Weekly seasonality**: Displays weekly patterns or variations in the stock price."
-    )
-
+            # Plot components
+            st.subheader("Forecast Components")
+            fig2 = m.plot_components(forecast)
+            st.pyplot(fig2)
+            st.markdown(
+                "- **Trend**: Shows the overall direction of the stock price over time.\n"
+                "- **Yearly seasonality**: Highlights recurring annual patterns in the stock price.\n"
+                "- **Weekly seasonality**: Displays weekly patterns or variations in the stock price."
+            )
+            
+        except Exception as e:
+            st.error(f"Error in prediction model: {str(e)}")
+            st.stop()
 
 # Compare with other stocks in the same period
 st.subheader(f"Growth Comparison: {ticker} vs. Other Stocks")
 
 # Download data for comparison tickers
 comparison_data = {}
-for comp_ticker in comparison_tickers:
-    comp_data, _ = download_data(comp_ticker, historical_range)
-    if not comp_data.empty:
-        comp_data = comp_data[['Close']].reset_index()
-        comp_data.columns = ['ds', comp_ticker]
-        comp_data['ds'] = pd.to_datetime(comp_data['ds'])
+valid_tickers = []
 
-        # Calcolo della crescita percentuale
-        initial_price = comp_data[comp_ticker].iloc[0]  # Valore iniziale
-        comp_data[comp_ticker] = (comp_data[comp_ticker] / initial_price - 1) * 100  # % growth
+with st.spinner("Downloading comparison data..."):
+    for comp_ticker in comparison_tickers:
+        comp_data, _ = download_data(comp_ticker, actual_years)  # Use same period as main ticker
+        if not comp_data.empty:
+            # Calculate percentage growth
+            initial_price = comp_data['y'].iloc[0]
+            comp_data[comp_ticker] = (comp_data['y'] / initial_price - 1) * 100
+            comparison_data[comp_ticker] = comp_data[['ds', comp_ticker]]
+            valid_tickers.append(comp_ticker)
+        else:
+            st.warning(f"No data available for comparison ticker: {comp_ticker}")
 
-        comparison_data[comp_ticker] = comp_data
-
-# Normalizzazione del ticker principale
+# Prepare main ticker data for comparison
 merged_data = data[['ds', 'y']].copy()
 initial_price_main = merged_data['y'].iloc[0]  
-merged_data['y'] = (merged_data['y'] / initial_price_main - 1) * 100  # % growth
+merged_data['y'] = (merged_data['y'] / initial_price_main - 1) * 100
+merged_data.rename(columns={'y': ticker}, inplace=True)
+valid_tickers.insert(0, ticker)  # Add main ticker as first
 
-# Merge con gli altri tickers
-for comp_ticker, comp_data in comparison_data.items():
-    merged_data = merged_data.merge(comp_data[['ds', comp_ticker]], on='ds', how='left')
+# Merge all data
+for comp_ticker in valid_tickers[1:]:
+    if comp_ticker in comparison_data:
+        merged_data = pd.merge(merged_data, 
+                              comparison_data[comp_ticker], 
+                              on='ds', 
+                              how='outer')
 
-# Creazione della figura con Plotly
-fig = go.Figure()
+# Sort by date and fill missing values
+merged_data = merged_data.sort_values('ds').ffill()
 
-# Plot principale (ticker selezionato)
-fig.add_trace(go.Scatter(
-    x=merged_data['ds'], 
-    y=merged_data['y'], 
-    mode='lines', 
-    name=f"{ticker} Growth (%)", 
-    line=dict(color="black", width=1)
-))
-
-# Plot degli altri titoli per confronto
-for comp_ticker in comparison_tickers:
-    if comp_ticker in merged_data.columns:
-        fig.add_trace(go.Scatter(
-            x=merged_data['ds'], 
-            y=merged_data[comp_ticker], 
-            mode='lines', 
-            name=f"{comp_ticker} Growth (%)"
-        ))
-
-# Layout del grafico
-fig.update_layout(
-    title=f"Percentage Growth Comparison: {ticker} vs. Other Tickers",
-    xaxis_title="Date",
-    yaxis_title="Growth (%)",
-    legend_title="Tickers",
-    template="plotly_white",
-    hovermode="x unified",
-    width=900,
-    height=600,
-    yaxis=dict(autorange=True, fixedrange=False),
-    xaxis=dict(
-        rangeselector=dict(
-            buttons=list([
-                # Pulsanti predefiniti per intervalli di tempo comuni
-                dict(count=1, label="1m", step="month", stepmode="backward"),
-                dict(count=6, label="6m", step="month", stepmode="backward"),
-                dict(count=1, label="YTD", step="year", stepmode="todate"),
-                dict(count=1, label="1y", step="year", stepmode="backward"),
-                dict(step="all", label="All")  # Mostra tutti i dati
-            ])
-        ),
-        rangeslider=dict(visible=True),  
-        type="date"  
+# Create comparison plot
+if len(valid_tickers) > 1:
+    fig = go.Figure()
+    
+    colors = ['black', 'blue', 'green', 'red', 'purple', 'orange']  # Different colors for each ticker
+    
+    for i, t in enumerate(valid_tickers):
+        if t in merged_data.columns:
+            fig.add_trace(go.Scatter(
+                x=merged_data['ds'], 
+                y=merged_data[t], 
+                mode='lines',
+                name=t,
+                line=dict(color=colors[i % len(colors)], width=2 if i == 0 else 1)
+            ))
+    
+    fig.update_layout(
+        title=f"Percentage Growth Comparison",
+        xaxis_title="Date",
+        yaxis_title="Growth (%)",
+        legend_title="Tickers",
+        template="plotly_white",
+        hovermode="x unified",
+        height=600
     )
-)
-
-# Mostra il grafico in Streamlit
-st.plotly_chart(fig, use_container_width=True)
+    
+    st.plotly_chart(fig, use_container_width=True)
+else:
+    st.warning("Not enough valid data to generate comparison chart.")
 
     # Technical Indicators
 st.subheader("Technical Indicators")
